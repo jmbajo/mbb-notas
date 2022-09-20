@@ -1,11 +1,15 @@
-from flask import Blueprint
+from flask import Blueprint, render_template
 
 
 usuarios = Blueprint("usuarios", __name__)
 
 @usuarios.route("/")
 def home():
-    return "Estoy en el home de usuarios"
+    return render_template("index.html")
+
+@usuarios.route("/login")
+def login():
+    return render_template("login.html")
 
 
 @usuarios.route("/cargar-datos")
@@ -23,7 +27,7 @@ def test():
     # d1 = Nota(texto="d1", usuario=u1)
     # d2 = Nota(texto="d2", usuario=u1)
     # d3 = Nota(texto="d3", usuario=u3)
-    d4 = Nota(texto="d3", usuario_id=4)
+    d4 = Nota(texto="d3", usuario=u4)
 
     # db.session.add(u1)
     # db.session.add(u2)

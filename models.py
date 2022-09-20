@@ -7,7 +7,7 @@ class Usuario(db.Model):
     # TODO campos para almacenar información de login
     email = db.Column(db.String(300), unique=True)
 
-    # notas = db.relationship("Nota")
+    notas = db.relationship("Nota")
 
 
 class Nota(db.Model):
@@ -16,5 +16,5 @@ class Nota(db.Model):
     fecha_creacion = db.Column(db.DateTime, default=now())
     usuario_id = db.Column(db.Integer, db.ForeignKey("usuario.id"))
 
-    # usuario = db.relationship(Usuario)
+    usuario = db.relationship(Usuario)
 
