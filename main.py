@@ -4,6 +4,7 @@ from controlador_notas import notas
 from controlador_usuario import usuarios
 
 app = Flask(__name__)
+app.config["SECRET_KEY"] = "sadfsdifaskdfadfs"
 app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://root@127.0.0.1:3306/notas-app"
 
 db = SQLAlchemy(app)

@@ -1,4 +1,6 @@
-from flask import Blueprint, render_template
+import random
+
+from flask import Blueprint, render_template, flash
 
 
 usuarios = Blueprint("usuarios", __name__)
@@ -9,6 +11,12 @@ def home():
 
 @usuarios.route("/login")
 def login():
+    # simular que la mitad el login da incorrecto
+    if random.randint(0,1) > 0:
+        flash("el usuario se logueó correctamente", "success")
+    else:
+        flash("login incorrecto", "error")
+
     return render_template("login.html")
 
 
