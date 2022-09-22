@@ -1,23 +1,69 @@
 import random
 
-from flask import Blueprint, render_template, flash
-
+from flask import Blueprint, render_template, flash, request, url_for, redirect
+from werkzeug.security import generate_password_hash, check_password_hash
+from models import Usuario
 
 usuarios = Blueprint("usuarios", __name__)
 
 @usuarios.route("/")
 def home():
-    return render_template("index.html")
+    return "usuario OK"
+    # return render_template("home.html")
 
-@usuarios.route("/login")
+@usuarios.route("/login", methods=["GET", "POST"])
 def login():
-    # simular que la mitad el login da incorrecto
-    if random.randint(0,1) > 0:
-        flash("el usuario se logueó correctamente", "success")
-    else:
-        flash("login incorrecto", "error")
+    if request.method == "POST":
+        # Validación y loguear (potencialmente) al usuario
+        email = request.form["email"]
+        passw = request.form["password"]
 
-    return render_template("login.html")
+        user = Usuario.query.filter_by(email=email).first()
+        if user and check_password_hash(user.password, passw):
+            flash("Usuario logueado")
+            return redirect(url_for("usuarios.home"))
+        else:
+            flash("Usuario o password incorrectos")
+            return render_template("login.html")
+
+    else:
+        return render_template("login.html")
+
+
+@usuarios.route("/sign-up", methods=["GET", "POST"])
+def alta_usuario():
+    if request.method == "POST":
+        # procesar el formulario y crear un nuevo usuario en la BD
+        email = request.form["email"]
+        nombre = request.form["firstName"]
+        pass1 = request.form["password1"]
+        pass2 = request.form["password2"]
+
+        if pass1 != pass2:
+            flash("Los passwords no coinciden.")
+        elif email == "":
+            flash("No se puede crear un usuario sin email.")
+        else:
+            from models import Usuario
+
+            usuario = Usuario.query.filter_by(email=email).first()
+            if usuario is not None:
+                flash("Ese mail ya está registrado")
+            else:
+                nuevo_usuario = Usuario(nombre=nombre,
+                                        email=email,
+                                        password=generate_password_hash(pass1, method='sha256'))
+                from main import db
+
+                db.session.add(nuevo_usuario)
+                db.session.commit()
+
+                flash("Usuario Creado")
+                return render_template("login.html")
+        pass
+    else:
+        return render_template('sign_up.html')
+
 
 
 @usuarios.route("/cargar-datos")
