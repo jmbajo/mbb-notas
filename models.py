@@ -1,7 +1,8 @@
 from main import db
 from sqlalchemy.sql.functions import now
+from flask_login import UserMixin
 
-class Usuario(db.Model):
+class Usuario(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(300), nullable=False)
     password = db.Column(db.String(200), nullable=False)

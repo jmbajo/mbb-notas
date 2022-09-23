@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
 
 
 db = SQLAlchemy()
@@ -10,6 +11,18 @@ def init_app():
     app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://root@127.0.0.1:3306/notas-app"
 
     db.init_app(app)
+
+    login_manager = LoginManager()
+    login_manager.login_view = "usuarios.login"
+    login_manager.init_app(app)
+
+
+    @login_manager.user_loader
+    def load_usuario(id):
+        from models import Usuario
+        return Usuario.query.get(int(id))
+
+
 
     from controlador_notas import notas
     from controlador_usuario import usuarios

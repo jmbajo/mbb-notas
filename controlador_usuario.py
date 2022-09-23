@@ -2,14 +2,29 @@ import random
 
 from flask import Blueprint, render_template, flash, request, url_for, redirect
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import Usuario
+from models import Usuario, Nota
+from flask_login import login_user, logout_user, login_required, current_user
 
 usuarios = Blueprint("usuarios", __name__)
 
-@usuarios.route("/")
+@usuarios.route("/", methods=["POST", "GET"])
+@login_required
 def home():
-    return "usuario OK"
-    # return render_template("home.html")
+    if request.method == "POST":
+        texto = request.form["texto"]
+        if texto == " ":
+            texto = "(Nota Vacia)"
+
+        nueva_nota = Nota(texto=texto, usuario_id=current_user.id)
+
+        from main import db
+        db.session.add(nueva_nota)
+        db.session.commit()
+
+    return render_template('home.html', user=current_user)
+
+
+
 
 @usuarios.route("/login", methods=["GET", "POST"])
 def login():
@@ -21,6 +36,7 @@ def login():
         user = Usuario.query.filter_by(email=email).first()
         if user and check_password_hash(user.password, passw):
             flash("Usuario logueado")
+            login_user(user, remember=True)
             return redirect(url_for("usuarios.home"))
         else:
             flash("Usuario o password incorrectos")
@@ -30,10 +46,19 @@ def login():
         return render_template("login.html")
 
 
+@usuarios.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for("usuarios.login"))
+
+
+
+
 @usuarios.route("/sign-up", methods=["GET", "POST"])
 def alta_usuario():
     if request.method == "POST":
         # procesar el formulario y crear un nuevo usuario en la BD
+        print(request.form)
         email = request.form["email"]
         nombre = request.form["firstName"]
         pass1 = request.form["password1"]
@@ -59,8 +84,9 @@ def alta_usuario():
                 db.session.commit()
 
                 flash("Usuario Creado")
+                login_user(nuevo_usuario, remember=True)
                 return render_template("login.html")
-        pass
+
     else:
         return render_template('sign_up.html')
 
